@@ -7,12 +7,15 @@ data Shadow = Shadow {
 } deriving (Show)
 
 parseShadowString :: String -> Shadow
-parseShadowString x = Shadow  $ map parseShadowEntryString (words x)
+parseShadowString x = Shadow $ map parseShadowEntryString (words x)
+
+parseShadowFile :: String -> Shadow
+parseShadowFile x = do
+  shadow <- readFile x
+  parseShadowString shadow
 
 parseShadowLocal :: Shadow
-parseShadowLocal = do
-  shadow <- readFile "/etc/shadow"
-  parseShadowString shadow
+parseShadowLocal = parseShadowFile "/etc/shadow"
 
 
 data ShadowEntry = ShadowEntry {
@@ -35,4 +38,5 @@ parseShadowEntryString x = ShadowEntry (getValue x 0) (getValue x 1) (epochPlusD
 
 
 main = do
-  print parseShadowLocal
+  shadow <- parseShadowFile "./shadow"
+  print shadow
