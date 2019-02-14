@@ -1,4 +1,5 @@
 import System.IO  
+import Data.List
 import Data.Dates
 import Data.List.Split
 
@@ -7,15 +8,25 @@ data Shadow = Shadow {
 } deriving (Show)
 
 parseShadowString :: String -> Shadow
-parseShadowString x = Shadow $ map parseShadowEntryString (words x)
+parseShadowString shadow = Shadow $ map parseShadowEntryString (words shadow)
 
 parseShadowFile :: String -> IO Shadow
-parseShadowFile x = do
-  d <- readFile x
-  return $ parseShadowString d
+parseShadowFile fileName  = do
+  content <- readFile fileName
+  return $ parseShadowString content
 
-parseShadowLocal :: String -> IO Shadow
+parseShadowLocal :: IO Shadow
 parseShadowLocal = parseShadowFile "/etc/shadow"
+
+getUsers :: Shadow -> [String]
+getUsers shadow = [ username s | s <- (users shadow) ]
+
+hasName :: String -> ShadowEntry -> Bool
+hasName target user = (username user) == target
+
+getUser :: Shadow -> String -> Maybe ShadowEntry
+getUser shadow username = find (hasName username) (users shadow)
+
 
 data ShadowEntry = ShadowEntry {
   username :: String,
@@ -38,4 +49,4 @@ parseShadowEntryString x = ShadowEntry (getValue x 0) (getValue x 1) (epochPlusD
 
 main = do
   shadow <- parseShadowFile "./shadow"
-  print shadow
+  print $ show $ getUser shadow "root"
