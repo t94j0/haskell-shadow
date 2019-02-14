@@ -9,14 +9,13 @@ data Shadow = Shadow {
 parseShadowString :: String -> Shadow
 parseShadowString x = Shadow $ map parseShadowEntryString (words x)
 
-parseShadowFile :: String -> Shadow
+parseShadowFile :: String -> IO Shadow
 parseShadowFile x = do
-  shadow <- readFile x
-  parseShadowString shadow
+  d <- readFile x
+  return $ parseShadowString d
 
-parseShadowLocal :: Shadow
+parseShadowLocal :: String -> IO Shadow
 parseShadowLocal = parseShadowFile "/etc/shadow"
-
 
 data ShadowEntry = ShadowEntry {
   username :: String,
